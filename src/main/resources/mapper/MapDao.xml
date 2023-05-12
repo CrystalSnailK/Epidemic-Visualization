@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wnjt.Springtboot01.dao.MapDao">
+
+    <select id="getNameAndValue" resultType="com.wnjt.Springtboot01.entity.NameValue" >
+    SELECT `name`AS `name`,`confirm` AS `value` FROM `provinceofchina`
+    </select>
+    <select id="getDeadData" resultType="com.wnjt.Springtboot01.entity.NameValue" >
+    SELECT `name` AS `name`,`confirm` AS `value`  FROM `confirm_tab`
+    </select>
+    <select id="getConfirmData" resultType="com.wnjt.Springtboot01.entity.NameValue" >
+    SELECT `name`AS `name`,`dead` AS `value` FROM `dead_tab`
+    </select>
+    <select id="getzheData" resultType="com.wnjt.Springtboot01.entity.NameValue" >
+    SELECT `name`AS `name`,`value` AS `value` FROM `zhe`
+    </select>
+
+    <select id="gettiaoData" resultType="com.wnjt.Springtboot01.entity.NameValue" >
+    SELECT `name`AS `name`,`value` AS `value` FROM `heal_tab`
+    </select>
+</mapper>

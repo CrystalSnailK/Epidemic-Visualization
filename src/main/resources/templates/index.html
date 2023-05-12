@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/index.css" >
+<!--    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">-->
+    <script src="/js/echarts.js"></script>
+    <script src="/js/jquery-3.6.1.min.js"></script>
+    <title>Title</title>
+</head>
+<body>
+<div id="all">
+<!--    <div id="head">-->
+<!--    </div>-->
+<!--    第一部分-->
+    <div id="left">
+        <div id="left_top"></div>
+        <div id="left_bottom"></div>
+    </div>
+<!--    第二部分   中国地图-->
+    <div id="center">
+
+
+    </div>
+<!--    第三部分-->
+    <div id="right">
+        <div id="right_top"></div>
+        <div id="right_bottom"></div>
+    </div>
+
+</div>
+<script>
+
+    //初始化中间china图
+    var mapchartDom = document.getElementById('center');
+    var mapChart = echarts.init(mapchartDom);
+    //初始化左上玫瑰图
+    var meichartDom = document.getElementById('left_top');
+    var meiChart = echarts.init(meichartDom);
+    //初始化左下饼图
+    var bingchartDom = document.getElementById('left_bottom');
+    var bingChart = echarts.init(bingchartDom);
+    //初始化右上折线图
+    var zhechartDom= document.getElementById('right_top');
+    var zheChart = echarts.init(zhechartDom);
+    //初始化右下角条状图
+    var tiaochartDom= document.getElementById('right_bottom');
+    var tiaoChart = echarts.init(tiaochartDom);
+
+
+    var allinfo;//让结果信息成为全局变量
+    var mapname='china';
+
+    mapChart.showLoading();//加载动画
+    meiChart.showLoading();//加载动画
+    bingChart.showLoading();//加载动画
+    zheChart.showLoading();//加载动画
+    tiaoChart.showLoading();//加载动画
+
+    function showmei(meiData){
+        meiChart.hideLoading();//关闭加载动画
+        //定义option
+        var option;
+        option = {
+            title: {
+                text: '中国各省（前八）疫情死亡人数玫瑰图',
+                subtext: '可查看每个省份死亡人数',
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}<br/>疫情死亡{c} (人)'
+            },
+            legend: {
+                top: 'bottom'
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: { show: true },
+                    dataView: { show: true, readOnly: false },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
+            },
+            series: [
+                {
+                    name: '死亡病例图 Chart',
+                    type: 'pie',
+                    radius: [10, 100],
+                    center: ['50%', '50%'],
+                    roseType: 'area',
+                    itemStyle: {
+                        borderRadius: 10
+                    },
+                    data: meiData
+                }
+            ]
+        };//定义bin图的option
+        option && meiChart.setOption(option);
+    }
+
+    function showmap(mapData,mapName){
+        $.get('/json/'+mapName+'.json', function (geoJson) {
+            mapChart.hideLoading();
+            echarts.registerMap(mapName, geoJson);
+            //定义option
+            var option;
+            (option ={
+                title: {
+                    text: '中国疫情感染分布图',
+                    subtext: '可查看每个省份感染人数',
+                    sublink:
+                        'http://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF%E8%A1%8C%E6%94%BF%E5%8D%80%E5%8A%83#cite_note-12'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}<br/>感染病例{c} (人)'
+                },
+                toolbox: {
+                    show: true,
+                    orient: 'vertical',
+                    left: 'right',
+                    top: 'center',
+                    feature:
+                        {
+                            dataView: { readOnly: false },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                },
+
+                visualMap: {
+                    min: 0,
+                    max: 2000,
+                    text: ['High', 'Low'],
+                    realtime: false,
+                    calculable: true,
+                    inRange: {color: ['lightblue', 'lightyellow', 'red']}
+                },
+                series: [{
+                    name: '中国疫情感染病例分布',
+                    type: 'map',
+                    map: mapName,
+                    label: {
+                        show: true
+                    },
+                    data: mapData,
+                }]
+            })//定义map的OPTION
+            option && mapChart.setOption(option);
+        });
+    }
+
+    function showbing(bingData){
+        bingChart.hideLoading();//关闭加载动画
+        //定义option
+        option = {
+            title: {
+                text: '中国各省（前八）确诊病例饼状图',
+                subtext: '',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left'
+            },
+            series: [
+                {
+                    name: 'Access From',
+                    type: 'pie',
+                    radius: '50%',
+                    data: bingData,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        bingChart.setOption(option);
+    }
+
+    function showzhe(zheData) {
+        zheChart.hideLoading();//关闭加载动画
+        //定义option
+        option = {
+            title: {text: '中国2021每月疫情感染人数折线图'},
+            // visualMap: {
+            //     min: 0,
+            //     max: 2000,
+            //     text: ['High', 'Low'],
+            //     realtime: false,
+            //     calculable: true,
+            //     inRange: {color: ['lightblue', 'lightyellow', 'red']}
+            // },
+
+
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}<br/>感染病例{c} (人)'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    data: zheData,
+                    type: 'line'
+                }
+            ]
+
+        }
+
+        zheChart.setOption(option);
+    }
+
+    function showtiao(tiaoData){
+        tiaoChart.hideLoading();//关闭加载动画
+        //定义option
+        option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}<br/>治愈人数{c} (人)'
+            },
+            title: {text: '中国各省（前八）疫情治愈人数条形图'},
+            xAxis: {
+                type: 'category',
+                data: ['湖南省', '安徽省', '四川省', '新疆维吾尔自治区', '江西省', '山东省', '江苏省', '陕西省'],
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    data: tiaoData,
+                    type: 'bar'
+                }
+            ]
+        }
+        tiaoChart.setOption(option);
+    }
+
+    //自适应窗口
+    window.onresize=function () {
+        mapChart.resize();
+        meiChart.resize();
+        bingChart.resize();
+        zheChart.resize();
+        tiaoChart.resize();
+    }
+
+//下面是前端请求后端调取数据库中的数据
+    $.ajax(
+        {
+            url:"/MapController/getData",
+            method:"GET",
+            dataType:"JSON",
+            success:function (result) {
+                allinfo=result;
+                console.log(result.data);//控制台输出data
+
+
+                //从下面开始mei   张堃茹
+                showmei(result.data.meiData);
+
+                //从下面开始map   张堃茹
+                showmap(result.data.mapData,mapname);
+
+                //从下面开始bing   胡凯婷
+                showbing(result.data.bingData,mapname);
+
+                //从下面开始zhe    姚晓丰
+                showzhe(result.data.zheData);
+
+                //从下面开始tiao   张沄
+                showtiao(result.data.tiaoData);
+            }
+        }
+    )
+    // 增加！   赋予地图echarts点击事件
+    mapChart.on("click",function (param) {
+        console.log(param.name)
+        showmap(allinfo.data.mapData,param.name)
+        // showbing(result.data.bingData,param.name);
+    })
+</script>
+</body>
+</html>
